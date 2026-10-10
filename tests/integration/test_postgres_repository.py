@@ -13,7 +13,6 @@ URL=os.environ["TEST_DATABASE_URL"]
 NOW=datetime(2026,10,10,tzinfo=timezone.utc)
 H="a"*64
 
-@pytest.fixture(scope="module",autouse=True)
 def schema():
     root=Path(__file__).resolve().parents[2]
     with psycopg.connect(URL,autocommit=True) as conn:
