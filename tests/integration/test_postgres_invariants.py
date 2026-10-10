@@ -17,13 +17,6 @@ ROOT = Path(__file__).resolve().parents[2]
 MIGRATIONS = [ROOT / "db/migrations" / f for f in
               ("001_core.sql","002_transactional_ledger.sql","003_payment_ledger_invariants.sql")]
 
-@pytest.fixture(scope="module", autouse=True)
-def schema():
-    with psycopg.connect(URL, autocommit=True) as conn:
-        for path in MIGRATIONS:
-            conn.execute(path.read_text())
-    yield
-
 def ids():
     return tuple(str(uuid.uuid4()) for _ in range(4))
 
