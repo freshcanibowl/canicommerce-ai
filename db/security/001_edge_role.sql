@@ -7,6 +7,10 @@ BEGIN
     CREATE ROLE canicommerce_edge NOLOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE NOREPLICATION;
   END IF;
 END $$;
+-- PUBLIC grants are inherited by every role, including canicommerce_edge.
+-- In this disposable dedicated database, revoke ambient schema access first.
+-- On an existing shared database this may break other applications: DO NOT apply there.
+REVOKE ALL ON SCHEMA public FROM PUBLIC;
 REVOKE ALL ON SCHEMA public FROM canicommerce_edge;
 REVOKE ALL ON ALL TABLES IN SCHEMA public FROM canicommerce_edge;
 REVOKE ALL ON ALL SEQUENCES IN SCHEMA public FROM canicommerce_edge;
