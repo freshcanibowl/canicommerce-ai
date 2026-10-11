@@ -27,7 +27,7 @@ def privilege(conn,role,table,permission):
 def test_worker_allowed_capture_permissions(dsn,worker):
     with psycopg.connect(dsn) as conn:
         assert privilege(conn,worker,"orders","SELECT")
-        assert privilege(conn,worker,"orders","UPDATE")
+        assert conn.execute("SELECT has_column_privilege(%s,%s,%s,%s)",(worker,"public.orders","status","UPDATE")).fetchone()[0]
         for table in ("provider_capture_mappings","processed_payment_events",
                       "order_commission_state","commission_entries"):
             assert privilege(conn,worker,table,"SELECT")
