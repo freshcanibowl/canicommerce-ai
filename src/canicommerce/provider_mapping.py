@@ -32,9 +32,8 @@ def capture_verified(dsn: str, *, capture: VerifiedCapture,
                      local_order_id: str, customer_id: str) -> bool:
     """Verify trusted mapping and immutable local amount before posting commissions.
 
-    WARNING: mapping check and repository capture use separate transactions.
-    Mapping is immutable; provider capture reservation is committed before
-    commission posting. A failed posting requires idempotent retry/reconciliation.
+    Mapping, capture reservation, payment event, order state and commissions
+    commit or roll back together under one SERIALIZABLE transaction.
     """
     if not isinstance(capture,VerifiedCapture) or capture.provider!="paypal-sandbox":
         raise ProviderMappingError("verified sandbox capture required")
@@ -64,8 +63,8 @@ def capture_verified(dsn: str, *, capture: VerifiedCapture,
                        (id,provider,provider_capture_id,provider_order_id,local_order_id)
                        VALUES (%s,%s,%s,%s,%s)""",
                     (str(uuid4()),capture.provider,capture.provider_capture_id,capture.order_id,local_order_id))
-    return PostgresCommissionRepository(dsn).capture(
-        order_id=local_order_id,provider=capture.provider,
-        event_id=capture.provider_event_id,payload_hash=capture.payload_hash,
-        customer_id=customer_id,eligible_sen=capture.eligible_net_sen,
-        captured_at=capture.verified_at)
+            return PostgresCommissionRepository(dsn).capture(
+                order_id=local_order_id,provider=capture.provider,
+                event_id=capture.provider_event_id,payload_hash=capture.payload_hash,
+                customer_id=customer_id,eligible_sen=capture.eligible_net_sen,
+                captured_at=capture.verified_at,connection=conn)
