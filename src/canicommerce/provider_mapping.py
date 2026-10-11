@@ -7,6 +7,7 @@ from uuid import uuid4
 import psycopg
 from canicommerce.payment_boundary import VerifiedCapture
 from canicommerce.postgres_repository import PostgresCommissionRepository
+from canicommerce.transaction_retry import run_with_serialization_retry
 
 class ProviderMappingError(ValueError):
     pass
@@ -30,6 +31,12 @@ def register_mapping(dsn: str, *, local_order_id: str, provider_order_id: str,
 
 def capture_verified(dsn: str, *, capture: VerifiedCapture,
                      local_order_id: str, customer_id: str) -> bool:
+    return run_with_serialization_retry(lambda: _capture_verified_once(
+        dsn, capture=capture, local_order_id=local_order_id, customer_id=customer_id))
+
+
+def _capture_verified_once(dsn: str, *, capture: VerifiedCapture,
+                           local_order_id: str, customer_id: str) -> bool:
     """Verify trusted mapping and immutable local amount before posting commissions.
 
     Mapping, capture reservation, payment event, order state and commissions
@@ -57,6 +64,11 @@ def capture_verified(dsn: str, *, capture: VerifiedCapture,
             if existing:
                 if existing[0]!=capture.order_id or str(existing[1])!=local_order_id:
                     raise ProviderMappingError("capture ID replayed for another order")
+            other_capture=conn.execute(
+                "SELECT provider_capture_id FROM provider_capture_mappings WHERE provider=%s AND local_order_id=%s",
+                (capture.provider,local_order_id)).fetchone()
+            if other_capture and other_capture[0]!=capture.provider_capture_id:
+                raise ProviderMappingError("second capture ID for local order")
             else:
                 conn.execute(
                     """INSERT INTO provider_capture_mappings
