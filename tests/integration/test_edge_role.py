@@ -1,7 +1,15 @@
 """Dedicated disposable CI database only: prove the edge role cannot write ledger."""
 from pathlib import Path
+import os
 import psycopg
 import pytest
+
+@pytest.fixture
+def test_dsn():
+    dsn=os.environ.get('TEST_DATABASE_URL')
+    if not dsn:
+        pytest.skip('requires disposable TEST_DATABASE_URL')
+    return dsn
 
 @pytest.fixture
 def edge_role(test_dsn):
