@@ -69,7 +69,7 @@ def _capture_verified_once(dsn: str, *, capture: VerifiedCapture,
                 (capture.provider,local_order_id)).fetchone()
             if other_capture and other_capture[0]!=capture.provider_capture_id:
                 raise ProviderMappingError("second capture ID for local order")
-            else:
+            if not existing:
                 conn.execute(
                     """INSERT INTO provider_capture_mappings
                        (id,provider,provider_capture_id,provider_order_id,local_order_id)
