@@ -39,3 +39,15 @@ def test_edge_role_has_no_schema_usage(test_dsn,edge_role):
         assert conn.execute(
             "SELECT has_schema_privilege(%s,'public','CREATE')",(edge_role,)
         ).fetchone()[0] is False
+
+
+def test_edge_role_cannot_actually_read_or_write_ledger(test_dsn,edge_role):
+    with psycopg.connect(test_dsn) as conn:
+        with conn.transaction():
+            conn.execute('SET LOCAL ROLE canicommerce_edge')
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                conn.execute('SELECT id FROM public.orders LIMIT 1')
+        with conn.transaction():
+            conn.execute('SET LOCAL ROLE canicommerce_edge')
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                conn.execute("INSERT INTO public.processed_payment_events(provider,provider_event_id,order_id,payload_hash) VALUES ('fake','fake','00000000-0000-0000-0000-000000000000','fake')")
