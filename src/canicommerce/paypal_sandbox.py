@@ -33,7 +33,8 @@ class PayPalSandboxAdapter:
         if any(not h.get(k) for k in required):
             raise PaymentVerificationError("missing PayPal signature headers")
         cert=urlparse(h["paypal-cert-url"])
-        if cert.scheme!="https" or cert.hostname not in ("api-m.sandbox.paypal.com","api.sandbox.paypal.com"):
+        if (cert.scheme!="https" or cert.hostname not in ("api-m.sandbox.paypal.com","api.sandbox.paypal.com")
+                or cert.port not in (None,443) or cert.username or cert.password or cert.fragment):
             raise PaymentVerificationError("untrusted PayPal certificate URL")
         try:
             event=json.loads(raw_body)
@@ -44,6 +45,8 @@ class PayPalSandboxAdapter:
         capture=event.get("resource")
         if not isinstance(capture,dict) or capture.get("id")!=expected_capture_id:
             raise PaymentVerificationError("webhook capture mismatch")
+        if capture.get("status") not in (None,"COMPLETED"):
+            raise PaymentVerificationError("webhook capture not completed")
         token=self.get_access_token()
         if not token:
             raise PaymentVerificationError("missing server-side PayPal token")
