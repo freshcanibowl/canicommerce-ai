@@ -4,9 +4,7 @@ Caller must supply a real PayPalSandboxAdapter with server credentials and
 verified HTTPS transport. Never accept local order/customer IDs from webhook.
 """
 import json
-from uuid import UUID
 import psycopg
-from canicommerce.payment_boundary import PaymentVerificationError
 from canicommerce.provider_mapping import capture_verified
 
 class WebhookRoutingError(ValueError):
@@ -29,9 +27,13 @@ def process_paypal_capture_webhook(dsn: str, *, adapter, headers: dict,
     if not capture_id or len(capture_id)>128 or not capture_id.isascii() or not all(c.isalnum() or c in "-_" for c in capture_id):
         raise WebhookRoutingError("invalid capture ID")
     # The provider order ID in the webhook is an untrusted routing hint only.
-    provider_order_id=(resource.get("supplementary_data") or {}).get("related_ids",{}).get("order_id")
-    if not isinstance(provider_order_id,str) or not provider_order_id:
-        raise WebhookRoutingError("missing provider order routing hint")
+    supplementary=resource.get("supplementary_data")
+    related=supplementary.get("related_ids") if isinstance(supplementary,dict) else None
+    provider_order_id=related.get("order_id") if isinstance(related,dict) else None
+    if (not isinstance(provider_order_id,str) or not provider_order_id
+            or len(provider_order_id)>128 or not provider_order_id.isascii()
+            or not all(c.isalnum() or c in "-_" for c in provider_order_id)):
+        raise WebhookRoutingError("invalid provider order routing hint")
     with psycopg.connect(dsn) as conn:
         row=conn.execute(
             """SELECT m.local_order_id,m.expected_merchant_id,m.expected_gross_sen,
