@@ -17,13 +17,17 @@ class PostgresCommissionRepository:
 
     def capture(self, *, order_id: str, provider: str, event_id: str,
                 payload_hash: str, customer_id: str, eligible_sen: int,
-                captured_at: datetime) -> bool:
+                captured_at: datetime, connection=None) -> bool:
         """Return True if first successful capture, False for exact duplicate.
         SERIALIZABLE + order row lock ensures different events cannot double-award.
         """
-        with psycopg.connect(self.dsn) as conn:
-            with conn.transaction():
-                conn.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
+        from contextlib import nullcontext
+        connection_context = nullcontext(connection) if connection is not None else psycopg.connect(self.dsn)
+        with connection_context as conn:
+            transaction_context = nullcontext() if connection is not None else conn.transaction()
+            with transaction_context:
+                if connection is None:
+                    conn.execute("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE")
                 order = conn.execute(
                     "SELECT customer_id, eligible_net_sen, status, selling_partner_id, captured_at FROM orders WHERE id=%s FOR UPDATE",
                     (order_id,)).fetchone()
