@@ -11,5 +11,5 @@ def migrated_test_schema():
     psycopg = pytest.importorskip("psycopg")
     root = Path(__file__).resolve().parents[2]
     with psycopg.connect(dsn, autocommit=True) as conn:
-        for name in ("001_core.sql", "002_transactional_ledger.sql", "003_payment_ledger_invariants.sql"):
+        for name in ("001_core.sql", "002_transactional_ledger.sql", "003_payment_ledger_invariants.sql", "004_recovery_ledger.sql"):
             conn.execute((root / "db" / "migrations" / name).read_text())
