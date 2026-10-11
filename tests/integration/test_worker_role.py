@@ -49,3 +49,22 @@ def test_worker_cannot_approve_settlement_by_sql(dsn,worker):
             conn.execute("SET LOCAL ROLE canicommerce_worker")
             with pytest.raises(psycopg.errors.InsufficientPrivilege):
                 conn.execute("UPDATE public.settlement_batches SET status='APPROVED' WHERE false")
+
+
+def test_worker_cannot_change_order_amount_or_identity(dsn,worker):
+    with psycopg.connect(dsn) as conn:
+        for column in ('eligible_net_sen','customer_id','selling_partner_id'):
+            assert conn.execute(
+                'SELECT has_column_privilege(%s,%s,%s,%s)',
+                (worker,'public.orders',column,'UPDATE')).fetchone()[0] is False
+        assert conn.execute(
+            'SELECT has_column_privilege(%s,%s,%s,%s)',
+            (worker,'public.orders','status','UPDATE')).fetchone()[0] is True
+
+
+def test_worker_cannot_mutate_referral_attribution_by_sql(dsn,worker):
+    with psycopg.connect(dsn) as conn:
+        with conn.transaction():
+            conn.execute('SET LOCAL ROLE canicommerce_worker')
+            with pytest.raises(psycopg.errors.InsufficientPrivilege):
+                conn.execute('UPDATE public.customer_attributions SET corrected_at=now() WHERE false')
