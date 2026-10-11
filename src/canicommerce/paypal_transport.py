@@ -8,7 +8,7 @@ import json
 import os
 import ssl
 from urllib.parse import urlencode, urlparse
-from urllib.request import Request, urlopen
+from urllib.request import Request, build_opener, HTTPSHandler, HTTPRedirectHandler
 from urllib.error import HTTPError, URLError
 
 from canicommerce.payment_boundary import PaymentVerificationError
@@ -20,6 +20,16 @@ MAX_RESPONSE_BYTES = 262144
 class PayPalTransportError(PaymentVerificationError):
     pass
 
+class _NoRedirect(HTTPRedirectHandler):
+    def redirect_request(self, req, fp, code, msg, headers, newurl):
+        raise PayPalTransportError("PayPal redirects forbidden")
+
+
+def _secure_opener(request, *, timeout):
+    # Never follow redirects: OAuth headers must not leak to another origin.
+    return build_opener(_NoRedirect, HTTPSHandler(context=ssl.create_default_context())).open(request, timeout=timeout)
+
+
 class PayPalSandboxTransport:
     def __init__(self, *, client_id: str, client_secret: str, timeout: float = 10,
                  opener=None):
@@ -30,7 +40,7 @@ class PayPalSandboxTransport:
         self._client_id=client_id
         self._client_secret=client_secret
         self._timeout=timeout
-        self._opener=opener or urlopen
+        self._opener=opener or _secure_opener
 
     def _request(self, url: str, *, method: str, body: bytes = None, token: str = None,
                  content_type: str = "application/json"):
