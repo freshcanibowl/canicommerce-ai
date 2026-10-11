@@ -59,8 +59,11 @@ class PayPalSandboxTransport:
                     raise PayPalTransportError("oversized PayPal response")
                 if not 200<=response.status<300:
                     raise PayPalTransportError("PayPal API rejected request")
-                return json.loads(raw)
-        except (HTTPError,URLError,TimeoutError,OSError,ValueError) as exc:
+                result=json.loads(raw)
+                if not isinstance(result,dict):
+                    raise PayPalTransportError("invalid PayPal JSON response")
+                return result
+        except (HTTPError,URLError,TimeoutError,OSError,ValueError,TypeError) as exc:
             raise PayPalTransportError("PayPal Sandbox transport failed") from exc
 
     def get_access_token(self):
@@ -78,6 +81,8 @@ class PayPalSandboxTransport:
                 if len(raw)>MAX_RESPONSE_BYTES or not 200<=response.status<300:
                     raise PayPalTransportError("PayPal OAuth rejected request")
                 result=json.loads(raw)
+                if not isinstance(result,dict):
+                    raise PayPalTransportError("invalid PayPal OAuth JSON response")
         except (HTTPError,URLError,TimeoutError,OSError,ValueError) as exc:
             raise PayPalTransportError("PayPal OAuth transport failed") from exc
         token=result.get("access_token") if isinstance(result,dict) else None
