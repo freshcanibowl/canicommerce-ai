@@ -6,6 +6,9 @@ on:
 jobs:
   postgres:
     runs-on: ubuntu-latest
+    timeout-minutes: 12
+    permissions:
+      contents: read
     services:
       postgres:
         image: postgres:16
@@ -28,4 +31,7 @@ jobs:
         with:
           python-version: '3.11'
       - run: python -m pip install -e '.[test]' "psycopg[binary]>=3.2,<4"
-      - run: python -m pytest -q tests/integration
+      - name: Diagnose restricted worker capture and database integration
+        run: python -m pytest -vv -ra tests/integration/test_worker_capture_execution.py tests/integration/test_worker_role.py
+      - name: Run all PostgreSQL integration tests
+        run: python -m pytest -q tests/integration
