@@ -68,3 +68,20 @@ def test_worker_cannot_mutate_referral_attribution_by_sql(dsn,worker):
             conn.execute('SET LOCAL ROLE canicommerce_worker')
             with pytest.raises(psycopg.errors.InsufficientPrivilege):
                 conn.execute('UPDATE public.customer_attributions SET corrected_at=now() WHERE false')
+
+
+def test_worker_cannot_read_settlement_or_audit_data(dsn,worker):
+    # Capture service has no reason to inspect payout approvals or audit records.
+    with psycopg.connect(dsn) as conn:
+        for table in ("settlement_batches", "settlement_items", "settlement_locks",
+                      "recovery_obligations", "audit_events"):
+            assert not privilege(conn, worker, table, "SELECT"), table
+
+
+def test_worker_cannot_delete_capture_history(dsn,worker):
+    # Replay protection and commission evidence must remain append-only to this role.
+    with psycopg.connect(dsn) as conn:
+        for table in ("processed_payment_events", "provider_capture_mappings",
+                      "order_commission_state", "commission_entries"):
+            assert not privilege(conn, worker, table, "DELETE"), table
+            assert not privilege(conn, worker, table, "UPDATE"), table
