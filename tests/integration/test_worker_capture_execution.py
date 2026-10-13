@@ -7,7 +7,7 @@ from datetime import datetime,timezone
 from uuid import uuid4
 import pytest
 import psycopg
-from canicommerce.postgres_repository import PostgresCommissionRepository
+from canicommerce.postgres_repository import PostgresCommissionRepository, FinancialConflict
 
 @pytest.fixture
 def dsn():
@@ -45,8 +45,16 @@ def test_real_capture_under_restricted_worker_role(dsn):
                 order_id=order,provider="paypal-sandbox",event_id=event,
                 payload_hash="b"*64,customer_id=customer,eligible_sen=1200,
                 captured_at=now,connection=conn) is False
+    # Event replay with the same provider ID but a different payload is an error.
+    with psycopg.connect(dsn) as conn:
+        with conn.transaction():
+            conn.execute("SET LOCAL ROLE canicommerce_worker")
+            with pytest.raises(FinancialConflict, match="conflicting payload"):
+                PostgresCommissionRepository(dsn).capture(
+                    order_id=order,provider="paypal-sandbox",event_id=event,
+                    payload_hash="d"*64,customer_id=customer,eligible_sen=1200,
+                    captured_at=now,connection=conn)
     # A distinct capture event cannot award commission twice.
-    from canicommerce.postgres_repository import FinancialConflict
     with psycopg.connect(dsn) as conn:
         with conn.transaction():
             conn.execute("SET LOCAL ROLE canicommerce_worker")
