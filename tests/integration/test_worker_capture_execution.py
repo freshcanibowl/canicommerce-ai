@@ -45,6 +45,17 @@ def test_real_capture_under_restricted_worker_role(dsn):
                 order_id=order,provider="paypal-sandbox",event_id=event,
                 payload_hash="b"*64,customer_id=customer,eligible_sen=1200,
                 captured_at=now,connection=conn) is False
+    # A distinct capture event cannot award commission twice.
+    from canicommerce.postgres_repository import FinancialConflict
+    with psycopg.connect(dsn) as conn:
+        with conn.transaction():
+            conn.execute("SET LOCAL ROLE canicommerce_worker")
+            with pytest.raises(FinancialConflict, match="second capture"):
+                PostgresCommissionRepository(dsn).capture(
+                    order_id=order,provider="paypal-sandbox",
+                    event_id="different-"+str(uuid4()),payload_hash="c"*64,
+                    customer_id=customer,eligible_sen=1200,
+                    captured_at=now,connection=conn)
     with psycopg.connect(dsn) as conn:
         assert conn.execute("SELECT status FROM orders WHERE id=%s",(order,)).fetchone()[0]=="CAPTURED"
         rows=conn.execute("SELECT entry_type,amount_sen FROM commission_entries WHERE order_id=%s ORDER BY entry_type",(order,)).fetchall()
