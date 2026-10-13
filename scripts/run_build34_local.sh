@@ -15,4 +15,4 @@ python -m pip install -e '.[test]'
 python -m pytest -q tests/test_core.py tests/test_payment_architecture.py
 python -m pytest -vv -ra tests/integration/test_worker_capture_execution.py tests/integration/test_worker_role.py
 python -m pytest -q tests/integration
-echo "Build 3.4 offline checks completed."
+echo "Build 3.6 offline checks completed."
