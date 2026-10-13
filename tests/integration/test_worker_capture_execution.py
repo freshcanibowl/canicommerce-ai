@@ -1,6 +1,6 @@
 """Exercise actual ledger posting with SET ROLE in disposable PostgreSQL CI.
 
-Fake VerifiedCapture is ONLY for offline tests; never deploy this entrypoint.
+Synthetic test transactions only; never deploy this test as a payment ingress.
 """
 import os
 from datetime import datetime,timezone
@@ -59,4 +59,6 @@ def test_real_capture_under_restricted_worker_role(dsn):
     with psycopg.connect(dsn) as conn:
         assert conn.execute("SELECT status FROM orders WHERE id=%s",(order,)).fetchone()[0]=="CAPTURED"
         rows=conn.execute("SELECT entry_type,amount_sen FROM commission_entries WHERE order_id=%s ORDER BY entry_type",(order,)).fetchall()
-        assert rows==[("ORIGINAL",36),("SELLER",84)]\n        assert conn.execute("SELECT count(*) FROM processed_payment_events WHERE provider_event_id=%s",(event,)).fetchone()[0]==1\n        assert conn.execute("SELECT count(*) FROM commission_entries WHERE order_id=%s",(order,)).fetchone()[0]==2
+        assert rows==[("ORIGINAL",36),("SELLER",84)]
+        assert conn.execute("SELECT count(*) FROM processed_payment_events WHERE provider_event_id=%s",(event,)).fetchone()[0]==1
+        assert conn.execute("SELECT count(*) FROM commission_entries WHERE order_id=%s",(order,)).fetchone()[0]==2
