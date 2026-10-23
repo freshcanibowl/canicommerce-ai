@@ -1,0 +1,5 @@
+[
+  {"order_id":"demo-001","partner_id":"agent-A","role":"ORIGINAL","eligible_sen":10000,"amount_sen":300,"currency":"MYR"},
+  {"order_id":"demo-001","partner_id":"seller-B","role":"SELLER","eligible_sen":10000,"amount_sen":700,"currency":"MYR"},
+  {"order_id":"demo-002","partner_id":"agent-A","role":"ORIGINAL","eligible_sen":105,"amount_sen":3,"currency":"MYR"}
+]
