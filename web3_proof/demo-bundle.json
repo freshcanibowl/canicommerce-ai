@@ -1,0 +1,70 @@
+{
+  "schema": "proof-of-fair-commission/v0.2",
+  "synthetic": true,
+  "algorithm": "sha256-domain-separated-duplicate-last-v1",
+  "root": "6135cb032608b719f6c43eb72bf567546fde020211874911724be5beb8ec669b",
+  "leaf_count": 3,
+  "proofs": [
+    {
+      "record": {
+        "order_id": "demo-001",
+        "partner_id": "agent-A",
+        "role": "ORIGINAL",
+        "eligible_sen": 10000,
+        "amount_sen": 300,
+        "currency": "MYR"
+      },
+      "path": [
+        {
+          "side": "right",
+          "hash": "3df28045e666f236cd054c3c2d6c8cb8a9b222f6a9a86a8188a041675638546d"
+        },
+        {
+          "side": "right",
+          "hash": "8a1ee4ce1d48549084922a23c2fb2add597be7280b87c75b059946ef813edf78"
+        }
+      ]
+    },
+    {
+      "record": {
+        "order_id": "demo-001",
+        "partner_id": "seller-B",
+        "role": "SELLER",
+        "eligible_sen": 10000,
+        "amount_sen": 700,
+        "currency": "MYR"
+      },
+      "path": [
+        {
+          "side": "left",
+          "hash": "83d9f8c29edb1cb94b49ab5a9a4064b7ffec4cea4ae00d51e6a095f025810f76"
+        },
+        {
+          "side": "right",
+          "hash": "8a1ee4ce1d48549084922a23c2fb2add597be7280b87c75b059946ef813edf78"
+        }
+      ]
+    },
+    {
+      "record": {
+        "order_id": "demo-002",
+        "partner_id": "agent-A",
+        "role": "ORIGINAL",
+        "eligible_sen": 105,
+        "amount_sen": 3,
+        "currency": "MYR"
+      },
+      "path": [
+        {
+          "side": "right",
+          "hash": "87fe25e743ecf751adea950e44b30ceb993eb9c4630454ed232a4017a41f59b7"
+        },
+        {
+          "side": "left",
+          "hash": "5660884330bd4e1b03e906448d7d45cf2054799f2b282a3c9e3b28e487754349"
+        }
+      ]
+    }
+  ],
+  "limitations": "Proves inclusion in this bundle only; not payment, completeness, authenticity, or blockchain anchoring."
+}
