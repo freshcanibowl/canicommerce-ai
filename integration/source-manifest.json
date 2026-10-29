@@ -1,0 +1,30 @@
+{
+  "schema": "canicommerce-integration/1",
+  "generated_date": "2026-10-29",
+  "integration_branch": "integration/canibiz-trust-os-build02",
+  "source_repositories": [
+    {
+      "repo": "freshcanibowl/canicommerce-ai",
+      "ref": "main",
+      "role": "business domain core; SQL schema draft"
+    },
+    {
+      "repo": "freshcanibowl/canicommerce-ai",
+      "ref": "hackathon/web3-social-good-2026",
+      "role": "Merkle proof; Solidity anchor; Sepolia demonstration"
+    },
+    {
+      "repo": "freshcanibowl/canibiz-partner-commission-os",
+      "ref": "build/v1.8-staging-import",
+      "role": "commercial rules only; README says V1.8 package not migrated"
+    }
+  ],
+  "constraints": {
+    "no_main_mutation": true,
+    "synthetic_only": true,
+    "no_real_payments": true,
+    "no_private_caios_data": true,
+    "no_production_claims": true
+  },
+  "status": "INTEGRATION_SCAFFOLD_ONLY"
+}
