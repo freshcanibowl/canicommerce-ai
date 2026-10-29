@@ -1,0 +1,5 @@
+{
+  "deployer": "0xcF0588f0EE0332887fF75C3E20284bd0a31d555f",
+  "deployedTo": "0x8239C47aAe2512a42aE2D196787785b0f037756f",
+  "transactionHash": "0xcad229125e19a7da9977e1b03975adabf2ce0ba061a3ca73d4d0fe254be4fd78"
+}

@@ -1,4 +1,4 @@
-name: commission-core-tests
+name: commission-core-and-integration-tests
 on:
   push:
   pull_request:
@@ -10,5 +10,6 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.11'
-      - run: python -m pip install -e '.[test]'
+      - run: python -m pip install -e . -r requirements-app.txt
       - run: python -m pytest -q
+      - run: python -m compileall -q app.py src web3_proof

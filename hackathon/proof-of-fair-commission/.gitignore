@@ -1,0 +1,14 @@
+# --- Secrets & key material (P0-3: prevent accidental commit) ---
+.env
+.env.*
+*.pem
+*.key
+keystore/
+
+# --- Python bytecode & caches ---
+__pycache__/
+*.pyc
+cache/
+
+# --- Foundry build artifacts ---
+out/

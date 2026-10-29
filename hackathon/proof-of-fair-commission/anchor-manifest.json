@@ -1,0 +1,15 @@
+{
+  "schema": "commission-root-anchor/v0.4",
+  "synthetic": true,
+  "chain_status": "DEPLOYED",
+  "network": "Ethereum Sepolia",
+  "chain_id": 11155111,
+  "contract_address": "0x8239C47aAe2512a42aE2D196787785b0f037756f",
+  "anchor_tx_hash": "0xdb3b9a73012e5b8acce32e03a935ae7dc74c704a715fb858ed8f10b16f2a13c0",
+  "anchor_block_number": 11975079,
+  "root": "0x6135cb032608b719f6c43eb72bf567546fde020211874911724be5beb8ec669b",
+  "record_count": 3,
+  "schema_hash": "0x34d46aa1c0b74ab36d8ee18f1c0a859b7defa6c93bc7c0a237852b56a6b1e881",
+  "contract_function": "anchor(bytes32,uint256,bytes32)",
+  "limitations": "Synthetic demo data for hackathon proof-of-concept. Commission records are algorithmically generated, not from a live marketplace. Contract verified on Sepolia; independent RPC receipt verification passes against primary and backup endpoints."
+}
